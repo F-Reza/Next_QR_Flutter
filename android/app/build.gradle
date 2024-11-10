@@ -55,6 +55,12 @@ android {
     }
 }
 
+dependencies {
+    implementation 'com.google.mlkit:barcode-scanning:16.1.5'
+    // Add other dependencies here
+}
+
+
 flutter {
     source = "../.."
 }

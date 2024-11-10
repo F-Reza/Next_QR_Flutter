@@ -1,7 +1,9 @@
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:next_qrx/service_provider.dart';
 
 class QrScannerPage extends StatefulWidget {
   static const String routeName = '/scanner';
@@ -12,22 +14,8 @@ class QrScannerPage extends StatefulWidget {
 }
 
 class _QrScannerPageState extends State<QrScannerPage> {
-
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  Barcode? result;
-  QRViewController? controller;
-
-
-  @override
-  void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      controller!.pauseCamera();
-    } else if (Platform.isIOS) {
-      controller!.resumeCamera();
-    }
-  }
-
+  final ServiceProvider provider = ServiceProvider();
+  String? _scannedEmail;
 
   @override
   Widget build(BuildContext context) {
@@ -46,16 +34,25 @@ class _QrScannerPageState extends State<QrScannerPage> {
           children: [
             Expanded(
               flex: 5,
-              child: QRView(
-                key: qrKey,
-                onQRViewCreated: _onQRViewCreated,
-                overlay: QrScannerOverlayShape(
-                  borderWidth: 10,
-                  borderRadius: 10,
-                  borderLength: 20,
-                  borderColor: Theme.of(context).canvasColor,
-                  cutOutSize: MediaQuery.of(context).size.width * 0.8,
+              child: MobileScanner(fit: BoxFit.cover,
+                controller: MobileScannerController(
+                  detectionSpeed: DetectionSpeed.noDuplicates,
+                  returnImage: false,
                 ),
+                onDetect: (capture) {
+                  final List<Barcode> getBarcodes = capture.barcodes;
+
+                  for (final getEmail in getBarcodes) {
+                    setState(() {
+                      _scannedEmail = getEmail.rawValue;
+                    });
+
+                    //print("========BarCode: ${getEmail.rawValue} ================");
+                    if (getEmail.rawValue != null && _isValidEmail(getEmail.rawValue!)) {
+                      provider.mailContact(getEmail.rawValue!);
+                    }
+                  }
+                },
               ),
             ),
             Expanded(
@@ -65,25 +62,25 @@ class _QrScannerPageState extends State<QrScannerPage> {
                 color: Colors.black26,
                 height: 100,
                 child: Center(
-                  child: (result != null)
+                  child: (_scannedEmail != null)
                       ? Container(
-                          alignment: Alignment.center,
-                          height: 100,
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                          'Output: ${result!.code}'),
-                        ),
-                      )
+                    alignment: Alignment.center,
+                    height: 100,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    color: Colors.white,
+                    child:  Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                          'Output: $_scannedEmail'),
+                    ),
+                  )
                       : Container(
-                          alignment: Alignment.center,
-                          height: 100,
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          color: Colors.white38,
-                        child: const Text('Scan Now', style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500,fontSize: 26),),
-                      ),
+                    alignment: Alignment.center,
+                    height: 100,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    color: Colors.white38,
+                    child: const Text('Scan Now', style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500,fontSize: 26),),
+                  ),
                 ),
               ),
             ),
@@ -93,21 +90,10 @@ class _QrScannerPageState extends State<QrScannerPage> {
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
-
-    //setState(() => this.controller = controller);
-
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
-      setState(() {
-        result = scanData;
-      });
-    });
+  bool _isValidEmail(String email) {
+    final emailRegExp = RegExp(
+        r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+    return emailRegExp.hasMatch(email);
   }
 
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
-  }
 }

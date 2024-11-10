@@ -18,13 +18,15 @@ dependencies:
   pretty_qr_code:
   shared_preferences:
   share_plus:
-  fluttertoast:
   image:
+  image_picker:
+  qr_code_tools:
+  google_ml_kit:
+  provider:
   path_provider:
   photo_manager:
   screenshot:
   permission_handler:
-  image_picker:
   flutter_native_splash:
 
 dev_dependencies:
