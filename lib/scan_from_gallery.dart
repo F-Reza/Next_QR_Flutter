@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:next_qrx/service_provider.dart';
 
 class ScanFromGalleryScreen extends StatefulWidget {
   static const String routeName = '/scan_from_gallery';
@@ -11,6 +12,9 @@ class ScanFromGalleryScreen extends StatefulWidget {
 }
 
 class _ScanFromGalleryScreenState extends State<ScanFromGalleryScreen> {
+  final ServiceProvider provider = ServiceProvider();
+  String? _scannedEmail;
+
   String _message = "Select an image to scan for a QR code.";
   final ImagePicker _picker = ImagePicker();
   final BarcodeScanner _barcodeScanner = GoogleMlKit.vision.barcodeScanner();
@@ -23,8 +27,20 @@ class _ScanFromGalleryScreenState extends State<ScanFromGalleryScreen> {
       final inputImage = InputImage.fromFilePath(image.path);
       List<Barcode> barcodes = await _barcodeScanner.processImage(inputImage);
 
+      final List<Barcode> getBarcodes = await _barcodeScanner.processImage(inputImage);
+      for (final getEmail in getBarcodes) {
+        setState(() {
+          _scannedEmail = getEmail.rawValue;
+        });
+
+        //print("========BarCode: ${getEmail.rawValue} ================");
+        if (getEmail.rawValue != null && _isValidEmail(getEmail.rawValue!)) {
+          provider.mailContact(getEmail.rawValue!);
+        }
+      }
+
       setState(() {
-        _message = barcodes.isNotEmpty ? "ok found" : "not found";
+        _message = barcodes.isNotEmpty ? "ok found -> $_scannedEmail" : "Email address not found!";
       });
     } else {
       setState(() {
@@ -45,7 +61,7 @@ class _ScanFromGalleryScreenState extends State<ScanFromGalleryScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFF561B),
         iconTheme: const IconThemeData(color: Colors.white),
-          title: const Text("Scan QR Code from Gallery"),
+          title: const Text('Scan QR Code from Gallery',style: TextStyle(color: Colors.white),),
       ),
       body: Center(
         child: Column(
@@ -66,4 +82,12 @@ class _ScanFromGalleryScreenState extends State<ScanFromGalleryScreen> {
       ),
     );
   }
+
+  bool _isValidEmail(String email) {
+    final emailRegExp = RegExp(
+        r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+    return emailRegExp.hasMatch(email);
+  }
+
+
 }

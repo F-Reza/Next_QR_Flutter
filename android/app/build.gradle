@@ -56,7 +56,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.mlkit:barcode-scanning:16.1.5'
+    implementation 'com.google.mlkit:barcode-scanning:17.3.0'
     // Add other dependencies here
 }
 
