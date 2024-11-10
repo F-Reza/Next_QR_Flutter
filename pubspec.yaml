@@ -12,6 +12,20 @@ dependencies:
   cupertino_icons: ^1.0.8
   qr_flutter:
   qr_code_scanner_plus:
+  top_snackbar_flutter:
+  mobile_scanner:
+  url_launcher:
+  pretty_qr_code:
+  shared_preferences:
+  share_plus:
+  fluttertoast:
+  image:
+  path_provider:
+  photo_manager:
+  screenshot:
+  permission_handler:
+  image_picker:
+  flutter_native_splash:
 
 dev_dependencies:
   flutter_test:

@@ -129,7 +129,8 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 10,),
               QrImageView(
-                data: controller.text,
+                //data: controller.text,
+                data: 'mailto:${controller.text}',
                 version: QrVersions.auto,
                 size: 240.0,
                 backgroundColor: Colors.white,
@@ -164,7 +165,10 @@ class _HomePageState extends State<HomePage> {
                         alignment: Alignment.center,
                         width: 60,
                         height: 40,
-                        color: Colors.white,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: Colors.white,
+                        ),
                         child: const Text('GET',
                           style: TextStyle(
                             fontSize: 20,
